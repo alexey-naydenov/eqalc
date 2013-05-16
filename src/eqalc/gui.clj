@@ -4,41 +4,40 @@
   (:use [eqalc calculator])
   (:use [eqalc prefix]))
 
-(defn equation->gui [{:keys [name unit]}]
-  {:name-label [name ""]
-   :value-show [(text :columns 10 :editable? false :halign :right) ""]
-   :value-edit [(text :columns 10 :halign :right) ""]
-   :unit-label [unit "left, wrap"]})
+(defn add-widgets [{:keys [name unit] :as eq}] 
+  ;; Add widgets to an equation description.
+  (merge eq 
+         {:name-label name :unit-label unit
+          :value-display (text :columns 10 :editable? false :halign :right)
+          :value-edit (text :columns 10 :halign :right)}))
 
-(defn guis->items [guis]
-  (apply concat (map (fn [m] [(m :name-label) (m :value-edit)
-                              (m :value-show) (m :unit-label)]) guis)))
+(defn widgets->items [ws]
+  ;; Convert a list of maps of widgets into a list of items for mig-panel.
+  (apply concat (map (fn [m] [[(m :name-label) ""] 
+                              [(m :value-edit) ""]
+                              [(m :value-display) ""]
+                              [(m :unit-label) "left, wrap"]]) ws)))
 
-(defn equations->items [eqns]
-  (apply concat (map equation->gui eqns)))
+(defn update-widget [vals {:keys [value-display name]}]
+  ;; Update widget text based on values.
+  (text! value-display (pformat (vals name))))
 
-(defn show-value [vals el]
-  (let [val (double (vals (first (:name-label el))))
-        show-el (first (:value-show el))
-        unit-el (first (:unit-label el))]
-    (text! show-el (pformat val))))
-
-(defn a-calculate [eqns guis e]
-  (let [vals (calculate {} eqns)]
-    (doall (map (partial show-value vals) guis))))
+(defn a-calculate [ews e]
+  ;; Take a list of equations with widgets then calculate and update widgets.
+  (let [vals (calculate {} ews)]
+    (doall (map (partial update-widget vals) ews))))
 
 (defn a-exit [e] (dispose! e))
 
 (defn equations->panel [eqns]
-  (let [value-guis (map equation->gui eqns)
+  ;; Create mig panel based on a list of equation descriptions.
+  (let [eqns-widgets (map add-widgets eqns)
         calculate-button (button :text "Calculate"
                                  :listen [:action 
-                                          (partial a-calculate eqns 
-                                                   value-guis)])
-        quit-button (button :text "Quit" 
-                            :listen [:action a-exit])]
+                                          (partial a-calculate eqns-widgets)])
+        quit-button (button :text "Quit" :listen [:action a-exit])]
   (mig-panel :constraints ["", "[right]"]
-             :items (concat (guis->items value-guis)
+             :items (concat (widgets->items eqns-widgets)
                             [[:separator "growx, span, wrap, gaptop 10"]
                              [calculate-button "span 2"]
                              [quit-button "wrap"]]))))

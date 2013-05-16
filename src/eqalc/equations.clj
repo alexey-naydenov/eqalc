@@ -1,15 +1,17 @@
 (ns eqalc.equations)
 
+(def nounit-name "Unit")
+
 (def boost-converter [{:name "V_out" :unit "V" :fun '(fn [vals] 28)}
                       {:name "I_out" :unit "A" :fun '(fn [vals] 0.05)}
-                      {:name "f_min" :unit "" :fun '(fn [vals] 50000)}
+                      {:name "f_min" :unit nounit-name :fun '(fn [vals] 50000)}
                       {:name "V_in_min" :unit "V" :fun '(fn [vals] 6.75)}
                       {:name "V_in" :unit "V" :fun '(fn [vals] 9.0)}
-                      {:name "V_ripple_pp" :unit "" :fun '(fn [vals] 0.005)}
+                      {:name "V_ripple_pp" :unit nounit-name :fun '(fn [vals] 0.005)}
                       {:name "V_sat" :unit "V" :fun '(fn [vals] 0.3)}
                       {:name "V_F" :unit "V" :fun '(fn [vals] 0.8)}
 
-                      {:name "ratio" :unit ""
+                      {:name "ratio" :unit nounit-name
                        :fun '(fn [{:strs [V_out V_F V_in_min V_sat]}] 
                                (/ (+ V_out (- V_F V_in_min))
                                   (- V_in_min V_sat)))}
@@ -20,7 +22,7 @@
                       {:name "t_on" :unit "s"
                        :fun '(fn [{:strs [ratio t_off]}]
                                (* ratio t_off))}
-                      {:name "duty" :unit ""
+                      {:name "duty" :unit nounit-name
                        :fun '(fn [{:strs [t_on t_off]}]
                                (/ t_on (+ t_on t_off)))}
                       

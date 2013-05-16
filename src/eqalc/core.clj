@@ -1,7 +1,8 @@
 (ns eqalc.core
   (:gen-class)
   (:use [seesaw core mig])
-  (:require [eqalc equations gui]))
+  (:use [eqalc gui])
+  (:use [eqalc equations]))
 
 (defn -main [& args]
   ;; work around dangerous default behaviour in Clojure
@@ -9,9 +10,10 @@
   (invoke-later
    (native!)
    (-> (frame :title "Equation Calculator"
-              :content "Hello, Seesaw"
+              :content (equations->panel boost-converter)
               :width 800
               :height 600
               :on-close :exit)
+       pack!
        show!)))
 

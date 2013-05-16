@@ -11,8 +11,6 @@
    (native!)
    (-> (frame :title "Equation Calculator"
               :content (equations->panel boost-converter)
-              :width 800
-              :height 600
               :on-close :exit)
        pack!
        show!)))

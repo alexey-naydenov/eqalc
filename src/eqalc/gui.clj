@@ -1,26 +1,31 @@
 (ns eqalc.gui
   (:use [seesaw core])
   (:use [seesaw core mig])
-  (:use [eqalc calculator]))
+  (:use [eqalc calculator])
+  (:use [eqalc prefix]))
 
 (defn equation->gui [{:keys [name unit]}]
   {:name-label [name ""]
-   :value-edit [(text :columns 20) ""]
+   :value-show [(text :columns 10 :editable? false :halign :right) ""]
+   :value-edit [(text :columns 10 :halign :right) ""]
    :unit-label [unit "left, wrap"]})
 
 (defn guis->items [guis]
-  (apply concat (map (fn [m] [(m :name-label) (m :value-edit) (m :unit-label)])
-                     guis)))
+  (apply concat (map (fn [m] [(m :name-label) (m :value-edit)
+                              (m :value-show) (m :unit-label)]) guis)))
 
 (defn equations->items [eqns]
   (apply concat (map equation->gui eqns)))
 
-(defn update-gui-element [vals el]
-  (text! (first (:value-edit el)) (vals (first (:name-label el)))))
+(defn show-value [vals el]
+  (let [val (double (vals (first (:name-label el))))
+        show-el (first (:value-show el))
+        unit-el (first (:unit-label el))]
+    (text! show-el (pformat val))))
 
 (defn a-calculate [eqns guis e]
   (let [vals (calculate {} eqns)]
-    (doall (map (partial update-gui-element vals) guis))))
+    (doall (map (partial show-value vals) guis))))
 
 (defn a-exit [e] (dispose! e))
 

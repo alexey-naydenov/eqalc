@@ -1,10 +1,10 @@
 (ns eqalc.equations)
 
-(def nounit-name "Unit")
+(def nounit-name "")
 
 (def boost-converter [{:name "V_out" :unit "V" :fun '(fn [vals] 28)}
                       {:name "I_out" :unit "A" :fun '(fn [vals] 0.05)}
-                      {:name "f_min" :unit nounit-name :fun '(fn [vals] 50000)}
+                      {:name "f_min" :unit "Hz" :fun '(fn [vals] 50000)}
                       {:name "V_in_min" :unit "V" :fun '(fn [vals] 6.75)}
                       {:name "V_in" :unit "V" :fun '(fn [vals] 9.0)}
                       {:name "V_ripple_pp" :unit nounit-name :fun '(fn [vals] 0.005)}

@@ -22,9 +22,16 @@
   ;; Update widget text based on values.
   (text! value-display (pformat (vals name))))
 
+(defn read-values [ews]
+  (reduce (fn [res {:keys [name value-edit]}]
+            (let [value (text value-edit)]
+              (if-not (empty? value)
+                (assoc res name (pscan value))
+                res))) {} ews))
+
 (defn a-calculate [ews e]
   ;; Take a list of equations with widgets then calculate and update widgets.
-  (let [vals (calculate {} ews)]
+  (let [vals (calculate (read-values ews) ews)]
     (doall (map (partial update-widget vals) ews))))
 
 (defn a-exit [e] (dispose! e))

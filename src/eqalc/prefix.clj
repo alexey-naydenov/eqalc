@@ -28,6 +28,7 @@
 (def prefixed-pattern #"\s*([+\-0-9.]+)\s*([pnumkMGT]?)\s*")
 
 (defn pscan [num-string]
+  ;; Convert a string that contains prefixed number into a number.
   (if-let [[whole-str num prefix] (re-matches prefixed-pattern num-string)]
     (* (read-string num) (math/expt 10.0 (prefix-power-map prefix)))
     (throw (NumberFormatException. 

@@ -17,13 +17,16 @@
    "<mul-div> = term | mul | div"
    "mul = mul-div <'*'> term"
    "div = mul-div <'/'> term"
-   "function = name <'('> <sp*> arguments <sp*> <')'>"
+   "function = id lparen arguments rparen"
    "arguments = args"
-   "<args> = term | term <sp* ',' sp*> args | Epsilon"
-   "<term> = <sp*> name <sp*> | <sp*> number <sp*> | add-sub | <'('> add-sub <')'>| <sp*> function <sp*>"
-   "name = #'[a-zA-Z]+[a-zA-Z0-9_-]*'"
-   "number = #'[0-9]+'"
-   "sp = #'[\\s\\t]+'"])
+   "<args> = add-sub (comma add-sub)* | Epsilon"
+   "<term> = id | number | lparen add-sub rparen | function"
+   "<comma> = <ws*','ws*>"
+   "<lparen> = <ws*'('ws*>"
+   "<rparen> = <ws*')'ws*>"
+   "id = <ws*> #'[a-zA-Z]+[a-zA-Z0-9_-]*' <ws*>"
+   "number = <ws*> #'[0-9]+' <ws*>"
+   "ws = #'[\\s\\t]+'"])
 
 (def equation-parser (insta/parser 
                       (apply str (interpose "\n" equation-grammar))))

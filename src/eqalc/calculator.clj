@@ -1,5 +1,7 @@
 (ns eqalc.calculator
-  (:require [instaparse.core :as insta]))
+  (:require [instaparse.core :as insta])
+  (:require [clojure.math.numeric-tower :as math])
+  (:use eqalc.prefix))
 
 (def nounit "")
 
@@ -62,8 +64,12 @@
      (assignment->description vname vfun "" nounit))
   ([vname vfun vunit]
      (assignment->description vname vfun "" vunit))
-  ([vname vfun vpref vunit] {:name vname :prefix vpref :unit vunit
-                             :fun (list 'fn '[vals] vfun)}))
+  ([vname vfun vpref vunit] 
+     (let [pfun (if (empty? vpref) 
+                  vfun
+                  (list '* (list 'math/expt 10 (prefix-power-map vpref)) vfun))] 
+       {:name vname :unit vunit
+        :fun (list 'fn '[vals] pfun)})))
 
 (defn ast->descriptions [eqns]
   ;; Convert an ast into a vector of dictionaries that allow evaluation.

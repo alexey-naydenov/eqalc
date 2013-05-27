@@ -1,17 +1,24 @@
 (ns eqalc.calculator
   (:require [instaparse.core :as insta]))
 
+(def nounit "")
+
 (defn update-values [vals {:keys [name fun]}]
+  ;; Unconditionally update values in dictionary
   (conj vals {name ((eval fun) vals)}))
 
-(defn calculate-equation? [vals {:keys [name]}] (not (contains? vals name)))
+(defn calculate-equation? [vals {:keys [name]}] 
+  ;; Dont update value if it is already in the dict.
+  (not (contains? vals name)))
 
 (defn calculate [vals eqns]
+  ;; Update values based on equations, dont update set values.
   (reduce update-values vals (filter (partial calculate-equation? vals) eqns)))
 
-(def equation-grammar 
+(def equation-grammar
+  ;; Grammar for equations of the form a = b + c, m V \n
   ["<program> = (assignment <nl>+)* (assignment)?"
-   "assignment = id <'='> add-sub (comma ((prefix unit) | unit))?"
+   "assignment = varid <'='> add-sub (comma ((prefix unit) | unit))?"
    "<add-sub> = mul-div | add | sub"
    "add = add-sub <'+'> mul-div"
    "sub = add-sub <'-'> mul-div"
@@ -27,20 +34,38 @@
    "<rparen> = <ws*')'ws*>"
    "unit = <ws*> #'[a-zA-Z]+' <ws*>"
    "prefix = <ws*> #'[pnumckMGT]' <ws*>"
+   "varid = <ws*> #'[a-zA-Z]+[a-zA-Z0-9_-]*' <ws*>"
    "id = <ws*> #'[a-zA-Z]+[a-zA-Z0-9_-]*' <ws*>"
-   "number = <ws*> #'[0-9]+' <ws*>"
+   "number = <ws*> #'[\\+\\-]?[0-9]*(\\.[0-9]*)?+([eE][\\+\\-]?[0-9]+)?' <ws*>"
    "nl = #'\r?\n'"
    "ws = #'[\\s\\t]+'"])
 
+;; Parser object for the grammar.
 (def equation-parser (insta/parser 
                       (apply str (interpose "\n" equation-grammar))))
+
+(defn equation->ast [equation]
+  ;; Transform string into an ast.
+  (equation-parser equation))
+
+(defn assignment->description
+  ;; Converts parsed assigment into dictionary with equiation description.
+  ([vname vfun]
+     (assignment->description vname vfun [:prefix ""] [:unit nounit]))
+  ([vname vfun vunit]
+     (assignment->description vname vfun [:prefix ""] vunit))
+  ([vname vfun vpref vunit] {:name vname :fun vfun :unit vunit}))
+
+(defn ast->descriptions [eqns]
+  ;; Convert an ast into a vector of dictionaries that allow evaluation.
+  (insta/transform {:varid identity :id identity :number read-string
+                    :assignment assignment->description}
+                   eqns))
 
 (def evaluation-transform {:add + :sub - :mul * :div /
                            :number read-string :expr identity})
 
-(defn equation->ast [equation]
-  (equation-parser equation))
-
 (defn evaluate-expression [expression-string]
   (->> (equation-parser expression-string) 
        (insta/transform evaluation-transform)))
+

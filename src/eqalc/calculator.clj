@@ -10,8 +10,8 @@
   (reduce update-values vals (filter (partial calculate-equation? vals) eqns)))
 
 (def equation-grammar 
-  ["program = assignment*"
-   "assignment = id <'='> add-sub (comma ((prefix unit) | unit))?<nl+>"
+  ["<program> = (assignment <nl>+)* (assignment)?"
+   "assignment = id <'='> add-sub (comma ((prefix unit) | unit))?"
    "<add-sub> = mul-div | add | sub"
    "add = add-sub <'+'> mul-div"
    "sub = add-sub <'-'> mul-div"

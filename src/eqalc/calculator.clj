@@ -33,7 +33,7 @@
    "<lparen> = <ws*'('ws*>"
    "<rparen> = <ws*')'ws*>"
    "unit = <ws*> #'[a-zA-Z]+' <ws*>"
-   "prefix = <ws*> #'[pnumckMGT]' <ws*>"
+   "prefix = <ws*> #'[pnumkMGT]' <ws*>"
    "varid = <ws*> #'[a-zA-Z]+[a-zA-Z0-9_-]*' <ws*>"
    "id = <ws*> #'[a-zA-Z]+[a-zA-Z0-9_-]*' <ws*>"
    "number = <ws*> #'[\\+\\-]?[0-9]*(\\.[0-9]*)?+([eE][\\+\\-]?[0-9]+)?' <ws*>"
@@ -48,17 +48,29 @@
   ;; Transform string into an ast.
   (equation-parser equation))
 
+(defn id->vals-read [id]
+  ;; Convert id to call to val dictionary call.
+  (conj (list id) 'vals))
+
+(defn op->calc [op x y]
+  ;; Convert an operator to list with plus operator.
+  (list op x y))
+
 (defn assignment->description
   ;; Converts parsed assigment into dictionary with equiation description.
   ([vname vfun]
-     (assignment->description vname vfun [:prefix ""] [:unit nounit]))
+     (assignment->description vname vfun "" nounit))
   ([vname vfun vunit]
-     (assignment->description vname vfun [:prefix ""] vunit))
-  ([vname vfun vpref vunit] {:name vname :fun vfun :unit vunit}))
+     (assignment->description vname vfun "" vunit))
+  ([vname vfun vpref vunit] {:name vname :prefix vpref :unit vunit
+                             :fun (list 'fn '[vals] vfun)}))
 
 (defn ast->descriptions [eqns]
   ;; Convert an ast into a vector of dictionaries that allow evaluation.
-  (insta/transform {:varid identity :id identity :number read-string
+  (insta/transform {:varid identity :unit identity :number read-string
+                    :prefix identity :id id->vals-read
+                    :add (partial op->calc '+) :sub (partial op->calc '-)
+                    :mul (partial op->calc '*) :div (partial op->calc '/)
                     :assignment assignment->description}
                    eqns))
 

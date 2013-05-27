@@ -10,7 +10,8 @@
   (reduce update-values vals (filter (partial calculate-equation? vals) eqns)))
 
 (def equation-grammar 
-  ["expr = add-sub"
+  ["program = assignment*"
+   "assignment = id <'='> add-sub (comma ((prefix unit) | unit))?<nl+>"
    "<add-sub> = mul-div | add | sub"
    "add = add-sub <'+'> mul-div"
    "sub = add-sub <'-'> mul-div"
@@ -24,8 +25,11 @@
    "<comma> = <ws*','ws*>"
    "<lparen> = <ws*'('ws*>"
    "<rparen> = <ws*')'ws*>"
+   "unit = <ws*> #'[a-zA-Z]+' <ws*>"
+   "prefix = <ws*> #'[pnumckMGT]' <ws*>"
    "id = <ws*> #'[a-zA-Z]+[a-zA-Z0-9_-]*' <ws*>"
    "number = <ws*> #'[0-9]+' <ws*>"
+   "nl = #'\r?\n'"
    "ws = #'[\\s\\t]+'"])
 
 (def equation-parser (insta/parser 

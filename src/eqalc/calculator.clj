@@ -73,6 +73,7 @@
 
 (defn ast->descriptions [eqns]
   ;; Convert an ast into a vector of dictionaries that allow evaluation.
+  ;; Ex: (->> (equation->ast "c = 1e3 + (a + b) , mV\n") ast->descriptions)
   (insta/transform {:varid identity :unit identity :number read-string
                     :prefix identity :id id->vals-read
                     :add (partial op->calc '+) :sub (partial op->calc '-)

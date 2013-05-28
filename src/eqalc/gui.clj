@@ -37,17 +37,24 @@
       (doall (map (partial update-widget vals) ews)))
     (catch NumberFormatException e (alert (.getMessage e)))))
 
-(defn a-exit [e] (dispose! e))
+(defn a-open [e]
+  ;; Open file with equation descriptions.
+  (alert "ok"))
+
+(def open-action (action :handler a-open
+                         :name "Open"
+                         :tip "Open equation descriptions"))
 
 (defn equations->panel [eqns]
   ;; Create mig panel based on a list of equation descriptions.
   (let [eqns-widgets (map add-widgets eqns)
-        calculate-button (button :text "Calculate"
-                                 :listen [:action 
-                                          (partial a-calculate eqns-widgets)])
-        quit-button (button :text "Quit" :listen [:action a-exit])]
+        evaluate-action (action :name "Evaluate" 
+                                :tip "Evaluate all equations"
+                                :handler (partial a-calculate eqns-widgets))
+        quit-action (action :name "Quit" :tip "Quit program"
+                            :handler (fn [e] (dispose! e)))]
   (mig-panel :constraints ["", "[right]"]
-             :items (concat (widgets->items eqns-widgets)
-                            [[:separator "growx, span, wrap, gaptop 10"]
-                             [calculate-button "span 2"]
-                             [quit-button "wrap"]]))))
+             :items (concat [[(toolbar :items [open-action evaluate-action
+                                               :separator quit-action]) 
+                              "growx, span, wrap"]]
+                            (widgets->items eqns-widgets)))))

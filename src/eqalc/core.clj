@@ -10,7 +10,7 @@
   (invoke-later
    (native!)
    (-> (frame :title "Equation Calculator"
-              :content (equations->panel boost-converter)
+              :content (equations->panel [])
               :on-close :exit)
        pack!
        show!)))

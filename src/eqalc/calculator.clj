@@ -46,8 +46,8 @@
 (def equation-parser (insta/parser 
                       (apply str (interpose "\n" equation-grammar))))
 
-(defn equation->ast [equation]
-  ;; Transform string into an ast.
+(defn equations->ast [equation]
+  ;; Transform string with equations into an ast.
   (equation-parser equation))
 
 (defn id->vals-read [id]
@@ -73,13 +73,16 @@
 
 (defn ast->descriptions [eqns]
   ;; Convert an ast into a vector of dictionaries that allow evaluation.
-  ;; Ex: (->> (equation->ast "c = 1e3 + (a + b) , mV\n") ast->descriptions)
+  ;; Ex: (->> (equations->ast "c = 1e3 + (a + b) , mV\n") ast->descriptions)
   (insta/transform {:varid identity :unit identity :number read-string
                     :prefix identity :id id->vals-read
                     :add (partial op->calc '+) :sub (partial op->calc '-)
                     :mul (partial op->calc '*) :div (partial op->calc '/)
                     :assignment assignment->description}
                    eqns))
+
+(defn equations->descriptions [eqns-string]
+  (ast->descriptions (equations->ast eqns-string)))
 
 (def evaluation-transform {:add + :sub - :mul * :div /
                            :number read-string :expr identity})

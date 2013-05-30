@@ -1,6 +1,5 @@
 (ns eqalc.calculator
   (:require [instaparse.core :as insta])
-  (:require [clojure.math.numeric-tower :as math])
   (:use eqalc.prefix))
 
 (def nounit "")
@@ -20,7 +19,7 @@
 (def equation-grammar
   ;; Grammar for equations of the form a = b + c, m V \n
   ["<program> = (assignment <nl>+)* (assignment)?"
-   "assignment = varid <'='> add-sub (comma ((prefix unit) | unit))?"
+   "assignment = varid <'='> add-sub (comma prefix unit)?"
    "<add-sub> = mul-div | add | sub"
    "add = add-sub <'+'> mul-div"
    "sub = add-sub <'-'> mul-div"
@@ -35,7 +34,7 @@
    "<lparen> = <ws*'('ws*>"
    "<rparen> = <ws*')'ws*>"
    "unit = <ws*> #'[a-zA-Z]+' <ws*>"
-   "prefix = <ws*> #'[pnumkMGT]' <ws*>"
+   "prefix = <ws*> #'[pnumkMGT]' | Epsilon <ws*>"
    "varid = <ws*> #'[a-zA-Z]+[a-zA-Z0-9_-]*' <ws*>"
    "id = <ws*> #'[a-zA-Z]+[a-zA-Z0-9_-]*' <ws*>"
    "number = <ws*> #'[\\+\\-]?[0-9]*(\\.[0-9]*)?+([eE][\\+\\-]?[0-9]+)?' <ws*>"
@@ -67,15 +66,21 @@
   ([vname vfun vpref vunit] 
      (let [pfun (if (empty? vpref) 
                   vfun
-                  (list '* (list 'math/expt 10 (prefix-power-map vpref)) vfun))] 
+                  (list '* (list 'clojure.math.numeric-tower/expt 
+                                 10 (prefix-power-map vpref)) vfun))] 
        {:name vname :unit vunit
         :fun (list 'fn '[vals] pfun)})))
+
+(defn identity-or-empty 
+  ([] "")
+  ([x] x))
+
 
 (defn ast->descriptions [eqns]
   ;; Convert an ast into a vector of dictionaries that allow evaluation.
   ;; Ex: (->> (equations->ast "c = 1e3 + (a + b) , mV\n") ast->descriptions)
   (insta/transform {:varid identity :unit identity :number read-string
-                    :prefix identity :id id->vals-read
+                    :prefix identity-or-empty :id id->vals-read
                     :add (partial op->calc '+) :sub (partial op->calc '-)
                     :mul (partial op->calc '*) :div (partial op->calc '/)
                     :assignment assignment->description}

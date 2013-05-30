@@ -1,5 +1,6 @@
 (ns eqalc.gui
   (:require [clojure.string :as string])
+  (:require [clojure.math.numeric-tower :as math])
   (:use [seesaw core])
   (:use [seesaw core mig])
   (:use [seesaw chooser])

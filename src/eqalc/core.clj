@@ -1,8 +1,7 @@
 (ns eqalc.core
   (:gen-class)
   (:use [seesaw core mig])
-  (:use [eqalc gui])
-  (:use [eqalc equations]))
+  (:use [eqalc gui]))
 
 (defn -main [& args]
   ;; work around dangerous default behaviour in Clojure

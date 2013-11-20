@@ -16,6 +16,6 @@ duty = t_on/(t_on + t_off)
 
 C_T = 4.0e-5*t_on, F
 I_pk_switch = 2*I_out*(1 + ratio), A
-L_min = t_on*I_pk_switch/(V_in_mi - V_sat), H
+L_min = t_on*I_pk_switch/(V_in_min - V_sat), H
 R_sc = 0.33/t_on/((V_in - V_sat)/L_min), Om
 C_0 = t_on*I_out/V_ripple_pp/V_out, H
